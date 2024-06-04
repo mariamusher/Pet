@@ -1,0 +1,1136 @@
+openapi: 3.0.3
+info:
+  description: "Тестовый API для подсистемы управления вишлистами «GiftLinker» с JWT-аутентификацией в куки"
+  title: "API подсистемы GiftLinker"
+  contact:
+    name: Мария Мушер
+    email: mariamusherwork@gmail.com
+  version: "1.0"
+servers:
+  - url: https://dev.example.com/v1/
+    description: DEV-контур
+  - url: https://example.com/v1/
+    description: Продуктовый контур
+tags:
+  - name: Управление вишлистами
+  - name: wishlist
+    description: 
+      API управления вишлистами  
+  - name: gift
+    description: 
+      API управления подарками 
+paths:
+  /wishlist:
+    post:
+      tags:
+        - wishlist
+      security:
+        - cookieAuth: []
+      description: Доступно только аутентифицированному пользователю
+      summary: Создает новый вишлист
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+             $ref: "#/components/schemas/PostWishlistObject"
+      responses:
+        201: 
+          description: "Вишлист создан"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WishlistObject"
+        400:
+          description: Ошибка в запросе
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorDetailObject"
+        401:
+          description: Токен аутентификации не предоставлен
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorDetailObject"
+        403:
+          description: Недостаточно прав для совершения операции
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorDetailObject"
+        404:
+          description: Вишлист не найден
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorDetailObject"
+        500:
+          description: Ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorDetailObject"
+    get:
+      tags:
+        - wishlist
+      security:
+        - cookieAuth: []
+      description: Доступно только владельцу вишлистов 
+      summary: Возвращает список вишлистов аутентифициорованного пользователя
+      responses:
+        200:
+          description: Список вишлистов найден
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/WishlistListObject"
+        400:
+          description: Ошибка в запросе
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorDetailObject"
+        401:
+          description: Токен аутентификации не предоставлен
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorDetailObject"
+        403:
+          description: Недостаточно прав для совершения операции
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorDetailObject"
+        404:
+          description: Вишлист не найден
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorDetailObject"
+        500:
+          description: Ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorDetailObject"              
+  /wishlist/{wishlist-id}:
+    get:
+      tags:
+        - wishlist
+      description: Возвращает содержание вишлиста с указанным id
+      summary: Возвращает содержание вишлиста с указанным id
+      parameters:
+        - name: wishlist-id
+          required: true
+          in: path
+          style: simple
+          explode: true
+          schema:
+            oneOf:
+            - type: string
+              format: uuid
+            - type: object
+              properties:
+                system:
+                  type: string
+                id:
+                  type: string
+      responses:
+        200:
+          description: Вишлист найден
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/WishlistContentObject"
+        400:
+          description: Ошибка в запросе
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorDetailObject"
+        401:
+          description: Токен аутентификации не предоставлен
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorDetailObject"
+        403:
+          description: Недостаточно прав для совершения операции
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorDetailObject"
+        404:
+          description: Вишлист не найден
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorDetailObject"
+        500:
+          description: Ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorDetailObject"
+    put:
+      tags:
+        - wishlist
+      security:
+        - cookieAuth: []
+      description: Доступно только владельцу вишлиста 
+      summary: Обновляет содержание вишлиста с указанным id
+      parameters:
+      - name: wishlist-id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        404:
+          description: Вишлист с идентификатором {wishlist-id} не найден
+        204:
+          description: Вишлист с идентификатором {request-id} успешно изменен
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WishlistObject"
+    delete:
+      tags:
+        - wishlist
+      security:
+        - cookieAuth: []
+      description: Доступно только владельцу вишлиста 
+      summary: Удаляет содержание вишлиста с указанным id
+      parameters:
+        - name: wishlist-id
+          required: true
+          in: path
+          style: simple
+          explode: true
+          schema:
+            oneOf:
+            - type: string
+              format: uuid
+            - type: object
+              properties:
+                system:
+                  type: string
+                id:
+                  type: string
+      responses:
+        204: {description: "Вишлист удалён"}     
+        400:
+          description: Ошибка в запросе
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorDetailObject"
+        401:
+          description: Токен аутентификации не предоставлен
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorDetailObject"
+        403:
+          description: Недостаточно прав для совершения операции
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorDetailObject"
+        404:
+          description: Вишлист не найден
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorDetailObject"
+        500:
+          description: Ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorDetailObject"
+  /wishlist/saved:
+    post:
+      tags:
+        - wishlist
+      security:
+        - cookieAuth: []
+      description: Доступно только аутентифицированному пользователю 
+      summary: Сохраняет вишлист в избранное
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+             $ref: "#/components/schemas/PostSavedWishlistObject"
+      responses:
+        201: 
+          description: "Вишлист сохранен в избранное"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetSavedWishlistObject"
+        400:
+          description: Ошибка в запросе
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorDetailObject"
+        401:
+          description: Токен аутентификации не предоставлен
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorDetailObject"
+        403:
+          description: Недостаточно прав для совершения операции
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorDetailObject"
+        404:
+          description: Вишлист не найден
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorDetailObject"
+        500:
+          description: Ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorDetailObject"  
+    get:
+      tags:
+        - wishlist
+      security:
+        - cookieAuth: []
+      description: Доступно только аутентифицированному пользователю 
+      summary: Возвращает список сохраненных вишлистов аутентифициорованного пользователя
+      responses:
+        200:
+          description: Список сохранённых вишлистов найден
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/GetSavedWishlistObject"
+        400:
+          description: Ошибка в запросе
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorDetailObject"
+        401:
+          description: Токен аутентификации не предоставлен
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorDetailObject"
+        403:
+          description: Недостаточно прав для совершения операции
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorDetailObject"
+        404:
+          description: Вишлисты не найдены
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorDetailObject"
+        500:
+          description: Ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorDetailObject" 
+  /wishlist/{wishlist-id}/saved:            
+    delete:
+      tags:
+        - wishlist
+      security:
+        - cookieAuth: []
+      description: Доступно только владельцу избранного
+      summary: Удаляет вишлист с указанным id из избранного
+      parameters:
+        - name: wishlist-id
+          required: true
+          in: path
+          style: simple
+          explode: true
+          schema:
+            oneOf:
+            - type: string
+              format: uuid
+            - type: object
+              properties:
+                system:
+                  type: string
+                id:
+                  type: string
+      responses:
+        204: {description: "Вишлист удалён из избранного"}     
+        400:
+          description: Ошибка в запросе
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorDetailObject"
+        401:
+          description: Токен аутентификации не предоставлен
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorDetailObject"
+        403:
+          description: Недостаточно прав для совершения операции
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorDetailObject"
+        404:
+          description: Вишлист не найден
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorDetailObject"
+        500:
+          description: Ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorDetailObject"    
+  /gift:
+    post:
+      tags:
+        - gift
+      security:
+        - cookieAuth: []
+      description: Создает новый подарок
+      summary: Создает новый подарок
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+             $ref: "#/components/schemas/PostGiftObject"
+      responses:
+        201: 
+          description: "Подарок создан"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetGiftObject"
+        400:
+          description: Ошибка в запросе
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorDetailObject"
+        401:
+          description: Токен аутентификации не предоставлен
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorDetailObject"
+        403:
+          description: Недостаточно прав для совершения операции
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorDetailObject"
+        404:
+          description: Подарок не найден
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorDetailObject"
+        500:
+          description: Ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorDetailObject"
+  /gift/{gift-id}/want-level:            
+    patch:
+      tags:
+        - gift
+      security:
+        - cookieAuth: []
+      description: Доступно только владельцу вишлиста  
+      summary: Обновляет степень желанности подарка с указанным id
+      parameters:
+        - name: gift-id
+          required: true
+          in: path
+          style: simple
+          explode: true
+          schema:
+            oneOf:
+            - type: string
+              format: uuid
+            - type: object
+              properties:
+                system:
+                  type: string
+                id:
+                  type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+             $ref: "#/components/schemas/GiftWantLevelObject"
+      responses:
+        204: {description: "Степень желанности изменена"}     
+        400:
+          description: Ошибка в запросе
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorDetailObject"
+        401:
+          description: Токен аутентификации не предоставлен
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorDetailObject"
+        403:
+          description: Недостаточно прав для совершения операции
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorDetailObject"
+        404:
+          description: Вишлист не найден
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorDetailObject"
+        500:
+          description: Ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorDetailObject" 
+  /gift/{gift-id}/commentary:            
+    patch:
+      tags:
+        - gift
+      security:
+        - cookieAuth: []
+      description: Доступно только владельцу вишлиста  
+      summary: Обновляет комментарий к подарку с указанным id
+      parameters:
+        - name: gift-id
+          required: true
+          in: path
+          style: simple
+          explode: true
+          schema:
+            oneOf:
+            - type: string
+              format: uuid
+            - type: object
+              properties:
+                system:
+                  type: string
+                id:
+                  type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+             $ref: "#/components/schemas/GiftCommentaryObject"
+      responses:
+        204: {description: "Комментарий изменен"}     
+        400:
+          description: Ошибка в запросе
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorDetailObject"
+        401:
+          description: Токен аутентификации не предоставлен
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorDetailObject"
+        403:
+          description: Недостаточно прав для совершения операции
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorDetailObject"
+        404:
+          description: Вишлист не найден
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorDetailObject"
+        500:
+          description: Ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorDetailObject" 
+  /gift/{gift-id}/quantity:            
+    patch:
+      tags:
+        - gift
+      security:
+        - cookieAuth: []
+      description: Доступно только владельцу вишлиста  
+      summary: Обновляет колличество подарков с указанным id
+      parameters:
+        - name: gift-id
+          required: true
+          in: path
+          style: simple
+          explode: true
+          schema:
+            oneOf:
+            - type: string
+              format: uuid
+            - type: object
+              properties:
+                system:
+                  type: string
+                id:
+                  type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+             $ref: "#/components/schemas/GiftQuantityObject"
+      responses:
+        204: {description: "Комментарий изменен"}     
+        400:
+          description: Ошибка в запросе
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorDetailObject"
+        401:
+          description: Токен аутентификации не предоставлен
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorDetailObject"
+        403:
+          description: Недостаточно прав для совершения операции
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorDetailObject"
+        404:
+          description: Вишлист не найден
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorDetailObject"
+        500:
+          description: Ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorDetailObject" 
+  /gift/{gift-id}:            
+    delete:
+      tags:
+        - gift
+      security:
+        - cookieAuth: []
+      description: Доступно только владельцу вишлиста 
+      summary: Удаляет подарок с указанным id
+      parameters:
+        - name: gift-id
+          required: true
+          in: path
+          style: simple
+          explode: true
+          schema:
+            oneOf:
+            - type: string
+              format: uuid
+            - type: object
+              properties:
+                system:
+                  type: string
+                id:
+                  type: string
+      responses:
+        204: {description: "Подарок удален"}     
+        400:
+          description: Ошибка в запросе
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorDetailObject"
+        401:
+          description: Токен аутентификации не предоставлен
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorDetailObject"
+        403:
+          description: Недостаточно прав для совершения операции
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorDetailObject"
+        404:
+          description: Вишлист не найден
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorDetailObject"
+        500:
+          description: Ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorDetailObject" 
+  /gift/reserve:
+    post: 
+      tags:
+        - gift
+      security:
+        - cookieAuth: []
+      description: Доступно только аутентифицированным пользователям 
+      summary: Бронирует подарок с указанным id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+             $ref: "#/components/schemas/PostReservedGiftObject"
+      responses:
+        201: 
+          description: "Подарок забронирован"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetReservedGiftObject"
+        400:
+          description: Ошибка в запросе
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorDetailObject"
+        401:
+          description: Токен аутентификации не предоставлен
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorDetailObject"
+        403:
+          description: Недостаточно прав для совершения операции
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorDetailObject"
+        404:
+          description: Подарок не найден
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorDetailObject"
+        500:
+          description: Ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorDetailObject"
+    get:
+      tags:
+        - gift
+      security:
+        - cookieAuth: []
+      description: Доступно только аутентифицированному пользователю 
+      summary: Возвращает список зарезервированных подарков аутентифициорованного пользователя
+      responses:
+        200:
+          description: Список зарезервированных подарков найден
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/GetReservedGiftObject"
+        400:
+          description: Ошибка в запросе
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorDetailObject"
+        401:
+          description: Токен аутентификации не предоставлен
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorDetailObject"
+        403:
+          description: Недостаточно прав для совершения операции
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorDetailObject"
+        404:
+          description: Подарки не найдены
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorDetailObject"
+        500:
+          description: Ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorDetailObject" 
+  /gift/{gift-id}/reserve:            
+    delete:
+      tags:
+        - gift
+      security:
+        - cookieAuth: []
+      description: Доступно только пользователю,забронировавшему подарок 
+      summary: Удаляет бронирование с указанным id
+      parameters:
+        - name: gift-id
+          required: true
+          in: path
+          style: simple
+          explode: true
+          schema:
+            oneOf:
+            - type: string
+              format: uuid
+            - type: object
+              properties:
+                system:
+                  type: string
+                id:
+                  type: string
+      responses:
+        204: {description: "Бронирование подарка удалено"}     
+        400:
+          description: Ошибка в запросе
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorDetailObject"
+        401:
+          description: Токен аутентификации не предоставлен
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorDetailObject"
+        403:
+          description: Недостаточно прав для совершения операции
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorDetailObject"
+        404:
+          description: Вишлист не найден
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorDetailObject"
+        500:
+          description: Ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorDetailObject" 
+components:
+    schemas:
+        WishlistListObject:
+          type: array
+          items:
+            $ref: "#/components/schemas/WishlistObject"
+        WishlistObject:
+            type: object
+            required: [wishlist_id, wishlist_name]
+            properties:
+              wishlist_id:
+                type: string
+                format: uuid
+              wishlist_name: 
+                type: string
+                maxLength: 50
+                example: День рождения
+              wishlist_celebration_date:
+                type: string
+                format: date
+                example: 2023-09-29
+              days_before_celebration: 
+                type: integer
+              every_year: 
+                type: boolean
+              reserve_visibility:  
+                $ref: "#/components/schemas/reserve_visibility"
+              wishlist_commentary: 
+                type: string
+                minLength: 1
+                maxLength: 255
+                example: Если не знает что подарить, просто дарите мне пирожки с капустой
+        PostWishlistObject:
+            type: object
+            required: [wishlist_name]
+            properties:
+              wishlist_name: 
+                type: string
+                maxLength: 50
+                example: День рождения
+              wishlist_celebration_date:
+                type: string
+                format: date
+                example: 2023-09-29
+              days_before_celebration: 
+                type: integer
+              every_year: 
+                type: boolean
+              reserve_visibility:  
+                $ref: "#/components/schemas/reserve_visibility"
+              wishlist_commentary: 
+                type: string
+                minLength: 1
+                maxLength: 255
+                example: Если не знает что подарить, просто дарите мне пирожки с капустой
+        WishlistContentObject:
+            type: object
+            required: [wishlist_id, wishlist_name]
+            properties:
+              wishlist_id:
+                type: string
+                format: uuid
+              wishlist_name: 
+                type: string
+                maxLength: 50
+                example: День рождения
+              wishlist_celebration_date:
+                type: string
+                format: date
+                example: 2023-09-29
+              days_before_celebration: 
+                type: integer
+              wishlist_commentary: 
+                type: string
+                minLength: 1
+                maxLength: 255
+                example: Если не знает что подарить, просто дарите мне пирожки с капустой
+              gift:
+                type: array
+                items:
+                  $ref: "#/components/schemas/GiftObject"
+        GiftObject:
+            type: object
+            required: [gift_id, gift_name, gift_price]
+            properties:
+              gift_id: 
+                type: string
+                format: uuid
+              gift_name: 
+                type: string
+                example: Велосипед
+              gift_preview_photo: 
+                type: string
+              gift_price: 
+                type: integer
+                minimum: 0
+                example: 17854,99
+              gift_colour: 
+                type: string
+                minLength: 1 
+                maxLength: 50 
+                example: Красный
+              gift_size: 
+                type: string 
+                minLength: 1
+                maxLength: 50
+                example: 3
+              gift_want_level: 
+                type: integer
+                minimum: 0 
+                example: 5
+              gift_commentary: 
+                type: string
+                minLength: 1
+                maxLength: 255
+                example: Можно такой же другого цвета
+              gift_quantity: 
+                type: integer
+                minimum: 1
+                example: 1
+              reserved_by:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ReservedByObject"
+        PostGiftObject:
+            type: object
+            required: [id_item, id_wishlist]
+            properties:
+              id_item: 
+                type: string
+                format: uuid
+              id_wishlist: 
+                type: string
+                format: uuid
+              gift_colour: 
+                type: string
+                minLength: 1 
+                maxLength: 50 
+                example: Красный
+              gift_size: 
+                type: string 
+                minLength: 1
+                maxLength: 50
+                example: 3
+        GetGiftObject:
+            type: object
+            required: [id,id_item, id_wishlist]
+            properties:
+              id: 
+                type: string
+                format: uuid
+              id_item: 
+                type: string
+                format: uuid
+              id_wishlist: 
+                type: string
+                format: uuid
+              gift_colour: 
+                type: string
+                minLength: 1 
+                maxLength: 50 
+                example: Красный
+              gift_size: 
+                type: string 
+                minLength: 1
+                maxLength: 50
+                example: 3
+              quantity:
+                type: integer
+                minimum: 1
+                example: 1
+        PostReservedGiftObject:
+          type: object
+          required: [id_gift]
+          properties:
+              id_gift: 
+                type: string
+                format: uuid
+        GetReservedGiftObject:
+          type: object
+          required: [id_gift, id_reserve_user, id]
+          properties:
+              id: 
+                type: string
+                format: uuid
+              id_gift: 
+                type: string
+                format: uuid
+              id_reserve_user: 
+                type: string
+                format: uuid
+        GiftWantLevelObject:
+          type: object
+          required: [want_level]
+          properties:
+              want_level: 
+                type: integer
+                example: 5
+                format: uuid
+        GiftCommentaryObject:
+          type: object
+          required: [commentary]
+          properties:
+              commentary: 
+                type: string
+                minLength: 1 
+                maxLength: 255
+                example: Можно еще какие-нибудь аксессуары докупить
+        GiftQuantityObject: 
+          type: object
+          required: [quantity]
+          properties:
+              quantity: 
+                type: integer
+                minimum: 1
+                example: 2
+        ReservedByObject:
+            type: object
+            required: [reserved_by_id]
+            properties:
+              reserved_by_id:
+                type: string
+                format: uuid
+              reserved_by_name: 
+                type: string
+                minLength: 1 
+                example: Иван
+        reserve_visibility:
+          type: string
+          enum:
+            - reserve_name
+            - reserve
+            - none
+          description:  видимость бронирования, reserve_name - отображать имя забронировавшего, reserve - отображать только бронирование, none - не ототбражать бронирования
+        PostSavedWishlistObject:
+            type: object
+            required: [id_wishlist]
+            properties:
+              id_wishlist:
+                type: string
+                format: uuid
+        GetSavedWishlistObject:
+            type: object
+            required: [id, id_wishlist, id_user]
+            properties:
+              id:
+                type: string
+                format: uuid
+              id_wishlist:
+                type: string
+                format: uuid
+              id_user:
+                type: string
+                format: uuid
+        ErrorDetailObject:
+          type: object
+          description:
+            Объект, содержащий детали ошибки (RFC 7807)
+          required: ["type","title"]
+          properties:
+            type:
+              type: string
+              format: uri
+            title:
+              type: string
+            status:
+              type: integer
+            detail:
+              type: string
+            instance:
+              type: string
+              format: uri
+    securitySchemes:
+      cookieAuth: 
+        type: apiKey
+        in: cookie
+        name: token # название куки, в который записывается сгенерированный JWT-токен
